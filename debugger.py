@@ -26,7 +26,7 @@ ax1.tick_params(axis='x',labelsize=9)
 ax1.tick_params(axis='y',labelsize=9)
 
 def urban():
-    u = us.UrbanScape(20,250000,ppcr,'CBD',randomize=True)
+    u = us.UrbanScape(20,250000,ppcr,'BDquadrants',randomize=True)
     return u
 
 u = urban()

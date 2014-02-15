@@ -5,23 +5,23 @@ import matplotlib.pyplot as pyplot
 #Urbanscape v4
 
 #Changes:
-#- randomized the income and rent distribution functions with a random multiplier
-#- added an element of randomness to the FAFH and FFR functions using a random float multiplier
-#- changed the FFR function such that the domain of incomes that yield a percent < 0.5% and beyond follows the function f(x) = 0.005
-#- added a GroceryStore Agent
-#- added an attribute to the UrbanScape class for income spent on groceries
+# randomized the income and rent distribution functions with a random multiplier
+# added an element of randomness to the FAFH and FFR functions using a random float multiplier
+# changed the FFR function such that the domain of incomes that yield a percent < 0.5% and beyond follows the function f(x) = 0.005
+# added a GroceryStore Agent
+# added an attribute to the UrbanScape class for income spent on groceries
 
 # Basic Classes: UrbanScape and Agent
 
 # The urbanscape defines the context within which agents act
 class UrbanScape(object):
 	population_per_block = 20
-	
+
 	#size = size of the urban grid
 	#rent = yearly cost of commercial and residential space
 	def __init__(self, size, rent, create_rule, gradient = None, randomize = True):
 		blocks = np.ones((size,size))
-		
+
 		self.create_rule = create_rule
 		self.size = size
 		self.agents = []
@@ -31,28 +31,28 @@ class UrbanScape(object):
 		self.rent_ceiling = rent
 		self.rent_floor = 5000
 		self.rent = np.ones_like(blocks) * self.rent_ceiling	#distribution of rent on urbanscape
-		
+
 		if gradient == 'vertical':
 			self.vertical_distribution()
 		elif gradient == 'diagonal':
 			self.diagonal_distribution()
 		elif gradient == 'random':
 			self.random_distribution()
-	        elif gradient == 'BDquadrants':
-	                self.businessdistricts_quadrant_distribution()
-	        elif gradient == 'CBD':
-	                self.centralbusinessdistrict_distribution()
+		elif gradient == 'BDquadrants':
+			self.businessdistricts_quadrant_distribution()
+		elif gradient == 'CBD':
+			self.centralbusinessdistrict_distribution()
 					
 		self.income = np.ones_like(blocks) * self.rent * 4
 		
 		if randomize == True:
-	                self.randomize_distribution()
+			self.randomize_distribution()
 		
-		self.externalities = np.zeros_like(blocks)	#total count of (negative) externality effect
+		self.externalities = np.zeros_like(blocks)		#total count of (negative) externality effect
 		self.ffcapture_number = np.zeros_like(blocks)	#count of FastFoodAgent effect in UrbanScape
 		self.gscapture_number = np.zeros_like(blocks)   #count of GroceryStoreAgent effect in UrbanScape
-		self.mobility = np.ones_like(blocks)		#a measure of disability
-		self.food_away = np.ones_like(blocks)		#distribution of food-related expenditures per block
+		self.mobility = np.ones_like(blocks)			#a measure of disability
+		self.food_away = np.ones_like(blocks)			#distribution of food-related expenditures per block
 		self.fast_food = np.ones_like(blocks)
 		self.grocery = np.ones_like(blocks)
 		self.update_expenditures()
