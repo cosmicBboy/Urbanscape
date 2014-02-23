@@ -2,7 +2,7 @@ import numpy as np
 import numpy.random as random
 import matplotlib.pyplot as pyplot
 
-#Urbanscape v4
+#Urbanscape v1.4
 
 #Changes:
 # randomized the income and rent distribution functions with a random multiplier
