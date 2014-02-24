@@ -135,13 +135,13 @@ class UrbanScape(object):
 		self.ffcapture_number = np.zeros((self.size,self.size))
 		self.gscapture_number = np.zeros((self.size,self.size))
 		for agent in self.agents:
-		        string = str(agent)
-		        
-		        if 'FastFoodAgent' in string:
-			     for coords in agent.effect_coordinates:
-				    x,y = coords
-				    if 0 <= x <= (self.size-1) and 0<= y <= (self.size-1):
-					   self.ffcapture_number[x,y] += 1
+	        string = str(agent)
+	        
+	        if 'FastFoodAgent' in string:
+		     for coords in agent.effect_coordinates:
+			    x,y = coords
+			    if 0 <= x <= (self.size-1) and 0<= y <= (self.size-1):
+				   self.ffcapture_number[x,y] += 1
 					   
 			if 'GroceryStoreAgent' in string:
 			     for coords in agent.effect_coordinates:

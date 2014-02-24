@@ -50,8 +50,9 @@ class UrbanScape(object):
 		self.grocery = np.ones_like(blocks) #income spent on groceries
 
 
+
 if __name__ == "__main__":
 	u = UrbanScape(3, 5000, 200000)
-	print "\n\nRent\n-----\n", u.rent
-	print "\n\nIncome\n-----\n", u.income
-	print "\n\nAgent Locations\n------------\n", u.agent_locations, "\n\n"
+	print u.rent
+	print u.income
+	print u.agent_locations
