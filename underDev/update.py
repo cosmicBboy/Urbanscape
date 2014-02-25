@@ -15,12 +15,6 @@ import numpy as np
 # Methods for updating agents in the UrbanScape |
 #------------------------------------------------
 
-def add_agent(UrbanScape, agent):
-	UrbanScape.agents.append(agent)
-	
-def remove_agent(UrbanScape, agent):
-	UrbanScape.agents.remove(agent)
-
 def update_agent_locations(UrbanScape):
 	'''
 	agent locations are specified as -1 if FastFoodAgent, 1 if GroceryStoreAgent, and -0.5 if block has both
@@ -46,17 +40,17 @@ def update_agent_locations(UrbanScape):
 		set_coords.remove(loc)
 	single_locs = set_coords
 
-	for agent, loc in self.agent_coords.items():
+	for agent, loc in u.agent_coords.items():
 	    string = str(agent)
 	    x,y = loc
 	    
 	    if loc in redundant_locs:
-	        self.agent_locations[x,y] = -0.5
+	        u.agent_locations[x,y] = -0.5
 	    if loc in single_locs:    
 	        if 'FastFoodAgent' in string:
-	            self.agent_locations[x,y] = -1               
+	            u.agent_locations[x,y] = -1               
 	        if 'GroceryStoreAgent' in string:
-	            self.agent_locations[x,y] = 1
+	            u.agent_locations[x,y] = 1
 
 #------------------------------------------
 # Methods for updating economic variables |
@@ -91,38 +85,38 @@ def capture_expenditures(UrbanScape, coords):
 	return ff_capture_total, gs_capture_total
 
 
-def update_income(self):
-	self.income = (self.rent * 4) * self.mobility
+def update_income(UrbanScape):
+	UrbanScape.income = (UrbanScape.rent * 4) * UrbanScape.mobility
 
-def update_exposure(self):
-	self.ffexposure = np.zeros((self.size,self.size))
-	self.gsexposure = np.zeros((self.size,self.size))
-	for agent in self.agents:
+def update_exposure(UrbanScape):
+	UrbanScape.ffexposure = np.zeros((UrbanScape.size,UrbanScape.size))
+	UrbanScape.gsexposure = np.zeros((UrbanScape.size,UrbanScape.size))
+	for agent in UrbanScape.agents:
         string = str(agent)
         
         if 'FastFoodAgent' in string:
 	     for coords in agent.effect_coordinates:
 		    x,y = coords
-		    if 0 <= x <= (self.size-1) and 0<= y <= (self.size-1):
-			   self.ffexposure[x,y] += 1
+		    if 0 <= x <= (UrbanScape.size-1) and 0<= y <= (UrbanScape.size-1):
+			   UrbanScape.ffexposure[x,y] += 1
 				   
 		if 'GroceryStoreAgent' in string:
 		     for coords in agent.effect_coordinates:
 		            x,y = coords
-		            if 0 <= x <= (self.size-1) and 0<= y <= (self.size-1):
-		                   self.gsexposure[x,y] += 1
+		            if 0 <= x <= (UrbanScape.size-1) and 0<= y <= (UrbanScape.size-1):
+		                   UrbanScape.gsexposure[x,y] += 1
 
-def update_expenditures(self):
+def update_expenditures(UrbanScape):
 	#Expenditures on 'Food Away From Home'
 	#Defining constants a1, b1
 	a1 = 1.5802
 	b1 = -0.32
 
-	for i in range(self.size):
-		for j in range(self.size):
-		        rand_multiplier = self.random_float_range(0.75,1.25)
-			FA = a1 * (self.income[i,j]**b1)
-			self.food_away[i,j] = FA * self.income[i,j] * rand_multiplier
+	for i in range(UrbanScape.size):
+		for j in range(UrbanScape.size):
+		        rand_multiplier = UrbanScape.random_float_range(0.75,1.25)
+			FA = a1 * (UrbanScape.income[i,j]**b1)
+			UrbanScape.food_away[i,j] = FA * UrbanScape.income[i,j] * rand_multiplier
 			
 	#Expenditures on 'Fast Food Restaurants'
 	#Defining constants a2, b2, c2
@@ -130,23 +124,23 @@ def update_expenditures(self):
 	b2 = -0.332
 	c2 = 0.40
 	
-	for i in range(self.size):
-		for j in range(self.size):
-		        rand_multiplier = self.random_float_range(0.75,1.25)
-			FF = -(a2 * self.income[i,j] + b2)**2 + c2
+	for i in range(UrbanScape.size):
+		for j in range(UrbanScape.size):
+		        rand_multiplier = UrbanScape.random_float_range(0.75,1.25)
+			FF = -(a2 * UrbanScape.income[i,j] + b2)**2 + c2
 			if FF < 0.075:
 				FF = 0.075
-			self.fast_food[i,j] = FF * self.food_away[i,j] * rand_multiplier
+			UrbanScape.fast_food[i,j] = FF * UrbanScape.food_away[i,j] * rand_multiplier
 			
 	#Expenditures on 'Food At Home', which as assumed to be all grocery expenditures
 	a1 = 73.969
 	b1 = -0.632
 	
-	for i in range(self.size):
-	        for j in range(self.size):
-	                rand_multiplier = self.random_float_range(0.75,1.25)
-	                FH = a1 * (self.income[i,j]**b1)
-	                self.grocery[i,j] = FH * self.income[i,j] * rand_multiplier
+	for i in range(UrbanScape.size):
+	        for j in range(UrbanScape.size):
+	                rand_multiplier = UrbanScape.random_float_range(0.75,1.25)
+	                FH = a1 * (UrbanScape.income[i,j]**b1)
+	                UrbanScape.grocery[i,j] = FH * UrbanScape.income[i,j] * rand_multiplier
 
 
 #----------------------------------------
@@ -162,17 +156,17 @@ def update_externalities(UrbanScape):
 
 	heal_rate = float(0.95)
 
-	    for i in range(self.size):
-	            for j in range(self.size):
-	                self.externalities[i,j] = self.externalities[i,j] + self.ffexposure[i,j] - self.gsexposure[i,j]
+	    for i in range(UrbanScape.size):
+	            for j in range(UrbanScape.size):
+	                UrbanScape.externalities[i,j] = UrbanScape.externalities[i,j] + UrbanScape.ffexposure[i,j] - UrbanScape.gsexposure[i,j]
 	                   
-	                if self.externalities[i,j] <= 0:
-	                    self.externalities[i,j] = 0
+	                if UrbanScape.externalities[i,j] <= 0:
+	                    UrbanScape.externalities[i,j] = 0
 
-	                if (self.ffexposure[i,j]-self.gsexposure[i,j]) == 0:
-						self.externalities[i,j] = int(self.externalities[i,j] * heal_rate)
+	                if (UrbanScape.ffexposure[i,j]-UrbanScape.gsexposure[i,j]) == 0:
+						UrbanScape.externalities[i,j] = int(UrbanScape.externalities[i,j] * heal_rate)
 
-def update_work_ability(self):
+def update_work_ability(UrbanScape):
 	#a logistic decay function
 	#decreases mobility to limit of 'a3' as externality count approaches infinity
 	
@@ -180,9 +174,9 @@ def update_work_ability(self):
 	b3 = float(1.5)
 	c3 = float(50)
 	
-	for i in range(self.size):
-		for j in range(self.size):
-			E = float(self.externalities[i,j])
+	for i in range(UrbanScape.size):
+		for j in range(UrbanScape.size):
+			E = float(UrbanScape.externalities[i,j])
 			M = a3 + ((1 - a3) / (1 + b3**(E - c3)))
-			self.mobility[i,j] = M	
+			UrbanScape.mobility[i,j] = M	
 

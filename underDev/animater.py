@@ -1,9 +1,14 @@
-import sys
-sys.path.insert(0, "/Users/Niels/Desktop/UrbanScape")
-import urbanscape_v3
-from urbanscape_v3 import profit_probability_create_rule
+'''
+Module for animating an UrbanScape simulation
+'''
+
+import urbanscape as us
 import matplotlib.pyplot as pyplot
 import matplotlib.animation as animation
+
+def animate_urbanscape(grid_size, income_ceiling, create_rule, setDist)
+
+ppcr = us.profit_probability_create_rule
 
 fig = pyplot.figure()
 ax1 = fig.add_subplot(2,2,1)
@@ -11,16 +16,16 @@ ax2 = fig.add_subplot(2,2,2)
 ax3 = fig.add_subplot(2,2,3)
 ax4 = fig.add_subplot(2,2,4)
 
-ax1.set_title('Income Distribution',fontname='serif',fontsize=10)
-ax2.set_title('Fast Food Exposure',fontsize=10)
-ax3.set_title('Externalities',fontsize=10)
-ax4.set_title('Food Agent Locations',fontsize=10)
+ax1.set_title('Income Distribution',fontname='serif',fontsize=20)
+ax2.set_title('Fast Food Exposure',fontsize=15)
+ax3.set_title('Externalities',fontsize=15)
+ax4.set_title('Food Agent Locations',fontsize=15)
 
 ax1.tick_params(axis='x',labelsize=9)
 ax1.tick_params(axis='y',labelsize=9)
 
 def urban():
-    u = urbanscape_v3.UrbanScape(20,250000,profit_probability_create_rule,'CBD',randomize=True)
+    u = us.UrbanScape(20,250000,ppcr,'BDquadrants',randomize=True)
     return u
 
 u = urban()
@@ -37,7 +42,7 @@ def updatefig(*args):
     im2.set_array(u.ffcapture_number)
     im3.set_array(u.externalities)
     im4.set_array(u.agent_locations)
-    
+
     im1.autoscale()
     im2.autoscale()
     im3.autoscale()
