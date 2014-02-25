@@ -79,56 +79,58 @@ class UrbanScape(object):
 	# defines the $ amount spent on fast food and groceries in blocks of given coordinates
 	def capture_expenditures(self, coords):
 		coords = coords
-		ff_capture_total = 0
-		gs_capture_total = 0
+		ffexposure_total = 0
+		gsexposure_total = 0
 		
 		for k in range(len(coords)):
 			x,y = coords[k]
 			
 			if 0 <= x <= (self.size-1) and 0 <= y <= (self.size-1):
-				ff_capture = (self.fast_food[x,y] / self.ffcapture_number[x,y]) * self.population_per_block
-				ff_capture_total += ff_capture
+				ffexposure = (self.fast_food[x,y] / (self.ffcapture_number[x,y] + 1e-10)) * self.population_per_block
+				ffexposure_total += ffexposure
 				
-				gs_capture = (self.grocery[x,y] / self.gscapture_number[x,y]) * self.population_per_block
-				gs_capture_total += gs_capture
+				gsexposure = (self.grocery[x,y] / (self.gscapture_number[x,y] + 1e-10)) * self.population_per_block
+				gsexposure_total += gsexposure
 			
-		return ff_capture_total, gs_capture_total
+		return ffexposure_total, gsexposure_total
 
 	def update_agent_locations(self):
-	        #agent locations are specified as -1 if FastFoodAgent, 1 if GroceryStoreAgent, and -0.5 if block has both
-	        #these values correspond to red, green, and orange on the 'RdYlGn' colormap on matplotlib.pyplot
+		#agent locations are specified as -1 if FastFoodAgent, 1 if GroceryStoreAgent, and -0.5 if block has both
+		#these values correspond to red, green, and orange on the 'RdYlGn' colormap on matplotlib.pyplot
 		self.agent_locations = np.zeros((self.size,self.size))
 		self.agent_coords = {}
 		for aa in self.agents:
 			self.agent_coords[aa] = aa.loc     #keeps track of type coord and type of agent
 			
-	        #this finds redundant and single-occurring coordinates.
-	        #redundant coordinates are assumed to contain both FastFoodAgents and GroceryStoreAgents
+		#this finds redundant and single-occurring coordinates.
+		#redundant coordinates are assumed to contain both FastFoodAgents and GroceryStoreAgents
 		coords = self.agent_coords.values()
 		set_coords = sorted(set(coords))
 		
 		for i in set_coords:
-		        coords.remove(i)
+			coords.remove(i)
 		redundant_locs = coords
 		
 		for i in redundant_locs:
-		        set_coords.remove(i)
-	        single_locs = set_coords
+			try:
+				set_coords.remove(i)
+			except:
+				pass
+		single_locs = set_coords
 		
 		for agent, loc in self.agent_coords.items():
-		        string = str(agent)
-		        x,y = loc
-		        
-		        if loc in redundant_locs:
-		            self.agent_locations[x,y] = -0.5
-		
-		        if loc in single_locs:
-		            
-		            if 'FastFoodAgent' in string:
-		                self.agent_locations[x,y] = -1
-		                
-		            if 'GroceryStoreAgent' in string:
-		                self.agent_locations[x,y] = 1
+			string = str(agent)
+			x,y = loc
+
+			if loc in redundant_locs:
+				self.agent_locations[x,y] = -0.5
+
+			if loc in single_locs:
+				if 'FastFoodAgent' in string:
+					self.agent_locations[x,y] = -1
+
+				if 'GroceryStoreAgent' in string:
+					self.agent_locations[x,y] = 1
 
 	def update_income(self):
 		self.income = (self.rent * 4) * self.mobility
@@ -137,34 +139,34 @@ class UrbanScape(object):
 		self.ffcapture_number = np.zeros((self.size,self.size))
 		self.gscapture_number = np.zeros((self.size,self.size))
 		for agent in self.agents:
-	        string = str(agent)
-	        
-	        if 'FastFoodAgent' in string:
-		     for coords in agent.effect_coordinates:
-			    x,y = coords
-			    if 0 <= x <= (self.size-1) and 0<= y <= (self.size-1):
-				   self.ffcapture_number[x,y] += 1
-					   
+			string = str(agent)
+
+			if 'FastFoodAgent' in string:
+				for coords in agent.effect_coordinates:
+					x,y = coords
+					if 0 <= x <= (self.size-1) and 0<= y <= (self.size-1):
+						self.ffcapture_number[x,y] += 1
+
 			if 'GroceryStoreAgent' in string:
-			     for coords in agent.effect_coordinates:
-			            x,y = coords
-			            if 0 <= x <= (self.size-1) and 0<= y <= (self.size-1):
-			                   self.gscapture_number[x,y] += 1
-	
+				for coords in agent.effect_coordinates:
+					x,y = coords
+					if 0 <= x <= (self.size-1) and 0<= y <= (self.size-1):
+						self.gscapture_number[x,y] += 1
+
 	def update_externalities(self):
 		#externalities here are 'negative externalities':
 		#ffscapture_number adds to externalities, and gscapture_number substracts from it.
 		#diminishes externalities by heal_rate if capture_number = 0
 		heal_rate = float(0.95)
-	
-	        for i in range(self.size):
-	                for j in range(self.size):
-	                        self.externalities[i,j] = self.externalities[i,j] + self.ffcapture_number[i,j] - self.gscapture_number[i,j]
-	                       
-	                        if self.externalities[i,j] <= 0:
-	                            self.externalities[i,j] = 0
-		
-		                if (self.ffcapture_number[i,j]-self.gscapture_number[i,j]) == 0:
+
+		for i in range(self.size):
+			for j in range(self.size):
+				self.externalities[i,j] = self.externalities[i,j] + self.ffcapture_number[i,j] - self.gscapture_number[i,j]
+
+				if self.externalities[i,j] <= 0:
+					self.externalities[i,j] = 0
+
+				if (self.ffcapture_number[i,j]-self.gscapture_number[i,j]) == 0:
 					self.externalities[i,j] = int(self.externalities[i,j] * heal_rate)
 		
 	def update_mobility(self):
@@ -189,7 +191,7 @@ class UrbanScape(object):
 
 		for i in range(self.size):
 			for j in range(self.size):
-			        rand_multiplier = self.random_float_range(0.75,1.25)
+				rand_multiplier = self.random_float_range(0.75,1.25)
 				FA = a1 * (self.income[i,j]**b1)
 				self.food_away[i,j] = FA * self.income[i,j] * rand_multiplier
 				
@@ -201,7 +203,7 @@ class UrbanScape(object):
 		
 		for i in range(self.size):
 			for j in range(self.size):
-			        rand_multiplier = self.random_float_range(0.75,1.25)
+				rand_multiplier = self.random_float_range(0.75,1.25)
 				FF = -(a2 * self.income[i,j] + b2)**2 + c2
 				if FF < 0.075:
 					FF = 0.075
@@ -212,10 +214,10 @@ class UrbanScape(object):
 		b1 = -0.632
 		
 		for i in range(self.size):
-		        for j in range(self.size):
-		                rand_multiplier = self.random_float_range(0.75,1.25)
-		                FH = a1 * (self.income[i,j]**b1)
-		                self.grocery[i,j] = FH * self.income[i,j] * rand_multiplier
+			for j in range(self.size):
+				rand_multiplier = self.random_float_range(0.75,1.25)
+				FH = a1 * (self.income[i,j]**b1)
+				self.grocery[i,j] = FH * self.income[i,j] * rand_multiplier
 
 #Rent and Income Distribution Functions	
 	
@@ -443,7 +445,12 @@ def no_create_rule(urbanscape):
 def random_create_rule(urbanscape):
 	x = random.randint(0,urbanscape.size)
 	y = random.randint(0,urbanscape.size)
-	urbanscape.add_agent(FastFoodAgent((x,y),urbanscape))
+
+	agent_type_decision = random.rand()
+	if agent_type_decision < 0.5:
+		urbanscape.add_agent(FastFoodAgent((x,y),urbanscape))
+	else:
+		urbanscape.add_agent(GroceryStoreAgent((x,y),urbanscape))
 
 #adds new FastFoodAgent in location with highest potential profit to cost ratio
 def profit_probability_create_rule(urbanscape):
@@ -759,12 +766,12 @@ def plot_experiment(externality_quintiles, urbanscape):
 #u = UrbanScape(20,200000,profit_probability_create_rule,'BDquadrants')
 #u = UrbanScape(20,200000,profit_probability_create_rule,'CBD')
 
-#run_experiment(20,250000,profit_probability_create_rule,'random',steps=100)
-#run_experiment(20,250000,profit_probability_create_rule,'BDquadrants',steps=100)
+#run_experiment(20,250000,profit_probability_create_rule,'random',steps=10)
+#run_experiment(20,250000,profit_probability_create_rule,'BDquadrants',steps=10)
 #run_experiment(20,250000,profit_probability_create_rule,'CBD',steps=100)
 
-#run_batch_experiments(3,20,200000,profit_probability_create_rule,'random',steps=200)
-#run_batch_experiments(3,20,200000,profit_probability_create_rule,'BDquadrants',steps=200)
+#run_batch_experiments(3,20,200000,random_create_rule,'random',steps=50)
+#run_batch_experiments(3,20,200000,profit_probability_create_rule,'random',steps=50)
 #run_batch_experiments(3,20,200000,profit_probability_create_rule,'CBD',steps=200)
 
 #run_batch_experiments(50,20,250000,profit_probability_create_rule,'random',steps=200)
