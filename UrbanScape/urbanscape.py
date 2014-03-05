@@ -451,11 +451,12 @@ def random_create_rule(urbanscape):
 	x = random.randint(0,urbanscape.size)
 	y = random.randint(0,urbanscape.size)
 
-	agent_type_decision = random.rand()
-	if agent_type_decision < 0.5:
-		urbanscape.add_agent(FastFoodAgent((x,y),urbanscape))
-	else:
-		urbanscape.add_agent(GroceryStoreAgent((x,y),urbanscape))
+	if urbanscape.time % 5 == 0:
+		agent_type_decision = random.rand()
+		if agent_type_decision < 0.5:
+			urbanscape.add_agent(FastFoodAgent((x,y),urbanscape))
+		else:
+			urbanscape.add_agent(GroceryStoreAgent((x,y),urbanscape))
 
 #adds new FastFoodAgent in location with highest potential profit to cost ratio
 def profit_probability_create_rule(urbanscape):
@@ -596,7 +597,7 @@ def plot_urbanscape(urbanscape):
 	pyplot.subplot(223)
 	mm = urbanscape.externalities
 	pyplot.imshow(mm, cmap = 'Purples', interpolation='nearest')
-	pyplot.title("Externalities")
+	pyplot.title("Negative Externalities")
 	pyplot.subplot(223).axes.get_xaxis().set_ticks([])
 	pyplot.subplot(223).axes.get_yaxis().set_ticks([])
 	
@@ -613,7 +614,7 @@ def plot_urbanscape(urbanscape):
 # Running Simulations that Returns Externalities Exposures by Income Quintile |
 #------------------------------------------------------------------------------
 
-def run_experiment(grid_size, rent_ceiling, create_rule, distribution, steps = 100):
+def run_experiment(grid_size, rent_ceiling, create_rule, distribution, randomize = True, steps = 100):
 	
 	n = grid_size
 	ceiling = rent_ceiling
@@ -622,7 +623,7 @@ def run_experiment(grid_size, rent_ceiling, create_rule, distribution, steps = 1
 	
 	#defining the urbanscape
 	#u = UrbanScape(20,10000,profit_probability_create_rule,'random')
-	u = UrbanScape(n,ceiling,create_rule,distribution)
+	u = UrbanScape(n, ceiling, create_rule, distribution, randomize)
 	
 	externality_quintiles = np.array(([],[],[],[],[]))
 	
@@ -676,7 +677,7 @@ def run_experiment(grid_size, rent_ceiling, create_rule, distribution, steps = 1
 			
 	return externality_quintiles, terminal_mobility_dist, terminal_income_dist, u.agent_coords
 
-def run_batch_experiments(batches, grid_size, rent_ceiling, create_rule, distribution, steps = 100):
+def run_batch_experiments(batches, grid_size, rent_ceiling, create_rule, distribution, randomize=True, steps = 100):
 	batches = batches
 	total_externalities = np.zeros((5,steps))
 	total_terminal_mobility = np.zeros((grid_size,grid_size))
@@ -685,7 +686,7 @@ def run_batch_experiments(batches, grid_size, rent_ceiling, create_rule, distrib
 	total_gsagent_locations = np.zeros((grid_size,grid_size))
 	
 	for i in range(batches):
-		experiment = run_experiment(grid_size, rent_ceiling, create_rule, distribution, steps)
+		experiment = run_experiment(grid_size, rent_ceiling, create_rule, distribution, randomize, steps)
 		total_externalities += experiment[0]
 		total_terminal_mobility += experiment[1]
 		total_terminal_income += experiment[2]
