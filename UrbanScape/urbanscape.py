@@ -15,13 +15,13 @@ import matplotlib.pyplot as pyplot
 # Basic Classes: UrbanScape and Agent |
 #-------------------------------------
 
-# The urbanscape defines the context within which agents act
 class UrbanScape(object):
+	# The urbanscape defines the context within which agents act
 	population_per_block = 20
 
 	#size = size of the urban grid
 	#rent = yearly cost of commercial and residential space
-	def __init__(self, size, rent, create_rule, gradient = None, randomize = True):
+	def __init__(self, size, rent, create_rule=None, gradient = None, randomize = False):
 		blocks = np.ones((size,size))
 
 		self.create_rule = create_rule
@@ -58,7 +58,6 @@ class UrbanScape(object):
 		self.fast_food = np.ones_like(blocks)
 		self.grocery = np.ones_like(blocks)
 		self.update_expenditures()
-
 	
 	def add_agent(self, agent):
 		self.agents.append(agent)
@@ -218,9 +217,11 @@ class UrbanScape(object):
 				rand_multiplier = self.random_float_range(0.75,1.25)
 				FH = a1 * (self.income[i,j]**b1)
 				self.grocery[i,j] = FH * self.income[i,j] * rand_multiplier
-
-#Rent and Income Distribution Functions	
 	
+#-----------------------------------------
+# Rent and Income Distribution Functions |
+#-----------------------------------------
+
 	#Defining types of block rent distributions, which also determines income level
 	def vertical_distribution(self):
 		
@@ -343,7 +344,7 @@ class UrbanScape(object):
         
 	def step(self):
 		self.create_rule(self)
-	    
+
 		#Update externality-related attributes
 		self.update_agent_locations()
 		self.update_capture_number()
@@ -359,20 +360,21 @@ class UrbanScape(object):
 		#Time step
 		self.time += 1
 
-# Base class for all Food Agents
-# agent has a location and wealth
+#---------------------------------
+# Base class for all Food Agents |
+#---------------------------------
 
 class Agent(object):
-	def __init__(self, loc, wealth):
+    def __init__(self, loc, wealth):
 		self.loc = loc		# x,y coordinates of location in urbanscape
 		self.wealth = wealth	# $ amount
-		
+
 	# Called every time-step
-	def step(self, urbanscape):
+    def step(self, urbanscape):
 		self.check_bankruptcy(urbanscape)
 		
 	# Remove the agent if broke
-	def check_bankruptcy(self, urbanscape):
+    def check_bankruptcy(self, urbanscape):
 		if self.wealth < 0:
 			self.wealth = 0
 			urbanscape.remove_agent(self)
@@ -437,7 +439,10 @@ class GroceryStoreAgent(Agent):
 		#capture_expenditures returns a list of two values, the 1st index being the ff_revenues
 						
 									
-#define create rules
+#------------------------
+# Create Rule Functions |
+#------------------------
+
 def no_create_rule(urbanscape):
 	pass
 
@@ -565,8 +570,11 @@ def potential_revenue(urbanscape, coords, agent = ''):
 		              capture_total += cc
 		                      
 		return capture_total
-	
-#creates a visualization of income distribution and fast food expenditure distribution
+
+#---------------------------------------
+# Functions for Visualizing UrbanScape |
+#---------------------------------------
+
 def plot_urbanscape(urbanscape):
 	fig = pyplot.figure()
 	
@@ -575,25 +583,36 @@ def plot_urbanscape(urbanscape):
 	ii = urbanscape.income
 	pyplot.imshow(ii, interpolation='nearest')
 	pyplot.title("Income Distribution")
-	
+	pyplot.subplot(221).axes.get_xaxis().set_ticks([])
+	pyplot.subplot(221).axes.get_yaxis().set_ticks([])
+
 	pyplot.subplot(222)
 	ff = urbanscape.ffcapture_number
 	pyplot.imshow(ff, cmap = 'YlOrRd', interpolation='nearest')
 	pyplot.title("FFR Effect Radii")
-	
+	pyplot.subplot(222).axes.get_xaxis().set_ticks([])
+	pyplot.subplot(222).axes.get_yaxis().set_ticks([])
+
 	pyplot.subplot(223)
 	mm = urbanscape.externalities
 	pyplot.imshow(mm, cmap = 'Purples', interpolation='nearest')
 	pyplot.title("Externalities")
+	pyplot.subplot(223).axes.get_xaxis().set_ticks([])
+	pyplot.subplot(223).axes.get_yaxis().set_ticks([])
 	
 	pyplot.subplot(224)
 	ll = urbanscape.agent_locations
 	pyplot.imshow(ll, cmap = 'RdYlGn', interpolation='nearest',vmin=-1,vmax=1)
 	pyplot.title("Food Agent Locations")
+	pyplot.subplot(224).axes.get_xaxis().set_ticks([])
+	pyplot.subplot(224).axes.get_yaxis().set_ticks([])
 	
-	return fig
+	#return fig
 
-#runs a simulation that returns externalities exposures by income quintile
+#------------------------------------------------------------------------------
+# Running Simulations that Returns Externalities Exposures by Income Quintile |
+#------------------------------------------------------------------------------
+
 def run_experiment(grid_size, rent_ceiling, create_rule, distribution, steps = 100):
 	
 	n = grid_size

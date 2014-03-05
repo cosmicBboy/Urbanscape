@@ -5,13 +5,14 @@ import matplotlib.animation as animation
 ppcr = us.profit_probability_create_rule
 rcr = us.random_create_rule
 
-def animate_urbanscape(size, income_ceiling, create_rule, gradient, randomize):
+
+def animate_urbanscape(urbanscape):
 
     fig = pyplot.figure()
-    ax1 = fig.add_subplot(2,2,1)
-    ax2 = fig.add_subplot(2,2,2)
-    ax3 = fig.add_subplot(2,2,3)
-    ax4 = fig.add_subplot(2,2,4)
+    ax1 = fig.add_subplot(2, 2, 1)
+    ax2 = fig.add_subplot(2, 2, 2)
+    ax3 = fig.add_subplot(2, 2, 3)
+    ax4 = fig.add_subplot(2, 2, 4)
 
     ax1.set_title('Income Distribution',fontname='serif',fontsize=10)
     ax2.set_title('Fast Food Exposure',fontsize=10)
@@ -22,7 +23,7 @@ def animate_urbanscape(size, income_ceiling, create_rule, gradient, randomize):
     ax1.tick_params(axis='y',labelsize=9)
 
     global u
-    u = us.UrbanScape(20,250000,create_rule,gradient,randomize)
+    u = urbanscape
 
     im1 = ax1.imshow(u.income, interpolation = 'nearest')
     im2 = ax2.imshow(u.ffcapture_number, cmap = 'YlOrRd',interpolation = 'nearest')
