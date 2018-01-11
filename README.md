@@ -8,3 +8,5 @@ I'm interested in looking at how the food environment shapes the distribution of
 This is a time-discrete model that simulates economic decisions made by `Food Providers`, which are the agents that act within the `Urbanscape`. 
 
 I have implemented two subclasses of `Food Providers`: `Fastfood Restaurants` and `Grocery Stores`.
+
+See the [white paper](https://github.com/cosmicBboy/Urbanscape/blob/master/urbanscape_paper.pdf) for more details
